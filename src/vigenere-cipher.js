@@ -20,13 +20,52 @@ const { NotImplementedError } = require('../extensions/index.js');
  * 
  */
 class VigenereCipheringMachine {
-  encrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+  constructor(isDirect = true) {
+    this.isDirect = isDirect; // Определяем тип машины: прямая или обратная
   }
-  decrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+
+  encrypt(message, key) {
+    if (!message || !key) throw new Error('Incorrect arguments!');
+    return this.process(message, key, 'encrypt');
+  }
+
+  decrypt(message, key) {
+    if (!message || !key) throw new Error('Incorrect arguments!');
+    return this.process(message, key, 'decrypt');
+  }
+
+  process(message, key, mode) {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const fullKey = key.toUpperCase().repeat(Math.ceil(message.length / key.length));
+    let result = '';
+    let keyIndex = 0;
+
+    message = message.toUpperCase();
+
+    for (let char of message) {
+      if (alphabet.includes(char)) {
+        const messageIndex = alphabet.indexOf(char);
+        const keyChar = fullKey[keyIndex++];
+        const keyIndexInAlphabet = alphabet.indexOf(keyChar);
+
+        let newIndex;
+        if (mode === 'encrypt') {
+          newIndex = (messageIndex + keyIndexInAlphabet) % 26;
+        } else {
+          newIndex = (messageIndex - keyIndexInAlphabet + 26) % 26;
+        }
+
+        result += alphabet[newIndex];
+      } else {
+        result += char; // Сохраняем любые символы, которые не являются буквами
+      }
+    }
+
+    if (!this.isDirect) {
+      result = result.split('').reverse().join('');
+    }
+
+    return result;
   }
 }
 
